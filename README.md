@@ -77,7 +77,7 @@ lerobot-record \
     --dataset.single_task="Grab the black cube"
 ```
 
-## 2. Data Inspection & Training (검수 및 학습)
+## 2. Demonstration Review & Training (데모 리뷰 및 학습)
 
 수집된 데이터의 품질을 검증하고 정책(Policy) 모델을 학습합니다.
 
@@ -129,7 +129,7 @@ lerobot-train \
   --wandb.enable=true
 ```
 
-## 3. Inference
+## 3. Inference (추론)
 
 학습된 모델을 로봇에 배포하여 추론을 수행합니다. 기본 `eval.py` 스크립트는 동기식(Synchronous)으로 동작합니다.
 
