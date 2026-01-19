@@ -77,7 +77,7 @@ lerobot-record \
     --dataset.single_task="Grab the black cube"
 ```
 
-## 2. Demonstration Review & Training (데모 리뷰 및 학습)
+## 2. Demonstration Review & Train (데모 리뷰 및 학습)
 
 수집된 데이터의 품질을 검증하고 정책(Policy) 모델을 학습합니다.
 
