@@ -66,6 +66,109 @@ pip install -e ".[dynamixel]"     # Dynamixel motor
 
 각 링크를 참조하여 로봇 세팅을 완료해주세요.
 
+<details>
+<summary>SO-101 Udev Setting</summary>
+
+**USB 포트 고정**
+
+* 포트 접근 권한 설정
+```bash
+sudo chmod 666 /dev/ttyACM0
+sudo chmod 666 /dev/ttyACM1
+```
+* dialout 추가 (Leader: ttyACM0, Follower: ttyACM1)
+```bash
+sudo usermod -a -G dialout $USER
+```
+* 고유 serial 넘버확인
+```bash
+udevadm info -a -n /dev/ttyACM0 | grep '{serial}' -m 1
+udevadm info -a -n /dev/ttyACM1 | grep '{serial}' -m 1
+```
+* udev 생성
+```
+sudo nano /etc/udev/rules.d/99-serial.rules
+
+# 아래 내용 추가 후 저장
+SUBSYSTEM=="tty", ATTRS{serial}=="5AB0183022", SYMLINK+="so101_leader"
+SUBSYSTEM=="tty", ATTRS{serial}=="5AB0182087", SYMLINK+="so101_follower"
+```
+* 적용
+```bash
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+```
+* 적용 확인
+```bash
+ls -l /dev/so101_*
+```
+**카메라 포트 고정**
+
+* video 장치목록 확인
+    * 위치에 해당하는 비디오 넘버를 기억 (ex. top: /dev/video0, wrist: /dev/video2)
+```bash
+sudo apt update
+sudo apt install v4l-utils
+```
+```bash
+v4l2-ctl --list-devices
+```
+* 포트 위치 확인
+```bash
+udevadm info -a -n /dev/video0 | grep 'KERNELS=="[0-9]' | head -n 1
+udevadm info -a -n /dev/video2 | grep 'KERNELS=="[0-9]' | head -n 1
+```
+* udev 생성
+```
+sudo nano /etc/udev/rules.d/99-camera.rules
+
+# 아래 내용 추가 후 저장
+SUBSYSTEM=="video4linux", KERNELS=="1-1:1.0", ATTR{index}=="0", SYMLINK+="cam_top"
+SUBSYSTEM=="video4linux", KERNELS=="1-5:1.0", ATTR{index}=="0", SYMLINK+="cam_wrist"
+```
+* 적용
+```bash
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+```
+* 적용 확인
+```bash
+ls -l /dev/cam_*
+```
+</details>
+
+<details>
+<summary>허깅페이스 계정 등록</summary>
+* HuggingFace CLI 토큰 로그인
+    * Write 권한으로 토큰을 미리 생성
+    
+```bash
+cd ~/lerobot
+hf auth login --add-to-git-credential --token <YOUR_TOKEN_HERE>
+```
+
+* 환경 변수 설정
+
+```bash
+HF_USER=$(hf auth whoami | head -n 1)
+echo $HF_USER
+```
+
+* bashrc 설정
+
+```bash
+export HF_USER=$(python - <<'PY'
+from huggingface_hub import whoami
+print(whoami().get("name", ""))
+PY
+)
+```
+```bash
+source ~/.bashrc
+```
+
+</details>
+
 ### Teleoperation Example
 
 **Command**
@@ -77,57 +180,59 @@ lerobot-teleoperate \
     --teleop.type=so101_leader \
     --teleop.port=/dev/ttyACM1 \
     --teleop.id=leader \
-    --robot.cameras="{
-        top:   { type: opencv, index_or_path: /dev/video0, width: 640, height: 480, fps: 30 },
-        wrist: { type: opencv, index_or_path: /dev/video2, width: 640, height: 480, fps: 30 }
-        }"
-```
-**API**
-```
-from lerobot.cameras.opencv.configuration_opencv import OpenCVCameraConfig
-from lerobot.teleoperators.so_leader import SO101LeaderConfig, SO101Leader
-from lerobot.robots.so_follower import SO101FollowerConfig, SO101Follower
-
-camera_config = {
-    "top": OpenCVCameraConfig(index_or_path=0, width=640, height=480, fps=25),
-    "wrist": OpenCVCameraConfig(index_or_path=2, width=640, height=480, fps=25)
-}
-
-robot_config = SO101FollowerConfig(
-    port="/dev/ttyACM0",
-    id="follower",
-)
-
-teleop_config = SO101LeaderConfig(
-    port="/dev/ttyACM1",
-    id="leader",
-)
-
-robot = SO101Follower(robot_config)
-teleop_device = SO101Leader(teleop_config)
-robot.connect()
-teleop_device.connect()
-
-while True:
-    action = teleop_device.get_action()
-    robot.send_action(action)
+    --robot.cameras='{
+        top: {type: opencv, index_or_path: 0, width: 640, height: 480, fps: 25},
+        wrist: {type: opencv, index_or_path: 2, width: 640, height: 480, fps: 25},
+    }' \
 ```
 
-**Record Command Example:**
+### Record Example
 
+**Command**
 ```bash
 lerobot-record \
     --robot.type=so101_follower \
-    --robot.port=/dev/tty.usbmodem585A0076841 \
-    --robot.id=my_awesome_follower_arm \
-    --robot.cameras="{ front: {type: opencv, index_or_path: 0, width: 1920, height: 1080, fps: 30}}" \
+    --robot.port=/dev/ttACM0 \
+    --robot.id=follower \
+    --robot.cameras='{
+        top: {type: opencv, index_or_path: 0, width: 640, height: 480, fps: 25},
+        wrist: {type: opencv, index_or_path: 2, width: 640, height: 480, fps: 25},
+    }' \
     --teleop.type=so101_leader \
-    --teleop.port=/dev/tty.usbmodem58760431551 \
-    --teleop.id=my_awesome_leader_arm \
+    --teleop.port=/dev/ttyACM1 \
+    --teleop.id=leader \
     --display_data=true \
-    --dataset.repo_id=${HF_USER}/record-test \
+    --dataset.repo_id=${HF_USER}/record-test \ # hf cli login required
+    --dataset.single_task="Grab the black cube" \
     --dataset.num_episodes=5 \
-    --dataset.single_task="Grab the black cube"
+    --dataset.episode_time_s=30 \
+    --dataset.reset_time_s=5
+```
+* local 저장 위치
+```bash
+~/.cache/huggingface/datasets/${HF_USER}/
+```
+
+**데이터 추가 수집 command**
+```bash
+lerobot-record \
+    --teleop.type=so101_leader \
+    --teleop.port=/dev/ttyACM0 \
+    --teleop.id=leader \
+    --robot.type=so101_follower \
+    --robot.port=/dev/ttyACM1 \
+    --robot.id=follower \
+    --robot.cameras='{
+        top: {type: opencv, index_or_path: 0, width: 640, height: 480, fps: 25},
+        wrist: {type: opencv, index_or_path: 2, width: 640, height: 480, fps: 25},
+    }' \
+    --dataset.repo_id=${HF_USER}/record-test \ # hf cli login required
+    --dataset.single_task="Grab the black cube" \
+    --dataset.num_episodes=5 \ # if you want to record 5 more episode
+    --dataset.episode_time_s=30 \
+    --dataset.reset_time_s=5 \
+    --display_data=true \
+    --resume=true # true 시, 추가 수집
 ```
 
 ## 2. Demonstration Review & Train (데모 리뷰 및 학습)
@@ -136,20 +241,22 @@ lerobot-record \
 
 ### 데이터 시각화 및 검수
 
-- 관찰과 액션 값의 동기화가 잘 되었는지 점검
-- 수집 시 액션이 부드러운지 점검
-- 조명 혹은 블러가 되었는지 점검
+* 관찰과 액션 값의 동기화가 잘 되었는지 점검
+* 수집 시 액션이 부드러운지 점검
+* 조명 혹은 블러가 되었는지 점검
 
 **Replay Dataset**
 ```bash
 lerobot-replay \
     --robot.type=so101_follower \
-    --robot.port=/dev/tty.usbmodem58760431541 \
-    --robot.id=my_awesome_follower_arm \
-    --dataset.repo_id=${HF_USER}/record-test \
+    --robot.port=/dev/ttyACM1 \
+    --robot.id=follower \
+    --dataset.repo_id=${HF_USER}/record-test \ # hf cli login required
     --dataset.episode=0
 ```
-**[Web-based Dataset Check](https://huggingface.co/spaces/lerobot/visualize_dataset)**
+
+**[Web-based Dataset Visualization](https://huggingface.co/spaces/lerobot/visualize_dataset)**
+* dataset repo id 입력 후, 수집 데이터 관찰 가능
 
 ### 모델 학습 (ACT / SmolVLA)
 
@@ -161,25 +268,28 @@ lerobot-replay \
 lerobot-train \
   --dataset.repo_id=${HF_USER}/your_dataset \
   --policy.type=act \
+  --batch_size=8 \
+  --steps=50000 \
   --output_dir=outputs/train/act_your_dataset \
   --job_name=act_your_dataset \
   --policy.device=cuda \
-  --wandb.enable=true \
-  --policy.repo_id=${HF_USER}/act_policy
+  --wandb.enable=true \ # optional
+  --policy.repo_id=${HF_USER}/act_policy # hf cli login required
 ```
 
 **Option B: SmolVLA (Vision-Language Action)**
 
 ```bash
 lerobot-train \
+  --dataset.repo_id=${HF_USER}/mydataset \ # hf cli login required
+  --policy.repo_id=${HF_USER}/mydataset_smolvla \
   --policy.path=lerobot/smolvla_base \
-  --dataset.repo_id=${HF_USER}/mydataset \
-  --batch_size=64 \
-  --steps=20000 \
+  --batch_size=8 \
+  --steps=50000 \
   --output_dir=outputs/train/my_smolvla \
   --job_name=my_smolvla_training \
   --policy.device=cuda \
-  --wandb.enable=true
+  --wandb.enable=true # optional
 ```
 
 ## 3. Inference (추론)
@@ -236,7 +346,7 @@ python -m lerobot.async_inference.policy_server \
 ```bash
 python -m lerobot.async_inference.robot_client \
     --robot.type=so101_follower \
-    --robot.port=/dev/so101_follower \
+    --robot.port=/dev/ttyACM1 \
     --robot.id=follower \
     --robot.cameras='{ \
         top: {type: opencv, index_or_path: 0, width: 640, height: 480, fps: 25}, \
