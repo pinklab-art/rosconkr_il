@@ -1,38 +1,53 @@
 # ROSCon KR IL Workshop: LeRobot with Real Robots
 
-이 레포지토리는 ROSCon 모방학습 워크샵을 위한 자료입니다. Hugging Face의 LeRobot 프레임워크를 사용하여 데이터 수집, 데이터셋 관리, 모델 학습(ACT, SmolVLA), 그리고 실물 로봇 제어를 위한 추론 과정을 다룹니다.
+2026 ROSCon KR 모방학습 워크샵을 위한 자료입니다. 
+Hugging Face의 LeRobot 프레임워크를 사용하여 데이터 수집, 데이터셋 관리, 모델 학습(ACT, SmolVLA), 그리고 실물 로봇 제어를 위한 추론 과정을 다룹니다.
 
 ---
 
 # Prerequisites & Installation
 
-### System Requirements
+## System Requirements
 
-LeRobot 구동을 위한 권장 최소 사양입니다.
-
-* **OS:** Linux (Ubuntu 20.04 or 22.04)
-* **Python:** 3.10
-* **Hardware:** NVIDIA GPU (CUDA 12+ recommended for training)
+* **Python: 3.10**
+* **Ubuntu (recommended)**
+* **NVIDIA GPU (CUDA 12+ 학습 시 권장)**
+* **GIT**
+* **2개 이상의 카메라**
+* **USB 허브**
 
 ### Installation
 
 LeRobot 및 하드웨어 제어 관련 의존성을 설치합니다.
 
 ```bash
-# 가상환경 생성 (Python 3.10 필수)
-conda create -y -n lerobot python=3.10
-conda activate lerobot
+# 가상환경 생성 
+mkdir -p ~/venv && cd ~/venv
+sudo add-apt-repository ppa:deadsnakes/ppa -y
+sudo apt update
+sudo apt install python3.10 python3.10-venv python3.10-dev -y
 
-# 레포지토리 클론 및 설치
+python3.10 -m venv lerobot
+
+# 가상환경 활성화
+source ~/venv/lerobot/bin/activate
+
+# ffmpeg 설치
+sudo apt update
+sudo apt install ffmpeg
+
+# lerobot git clone
 git clone https://github.com/huggingface/lerobot.git
-cd lerobot
+cd ~/lerobot
 
-# 기본 패키지 설치
+# 패키지 설치
 pip install -e .
 
-# 로봇 하드웨어 제어용 추가 패키지 (Dynamixel, Feetech, Cameras)
-pip install -e ".[dynamixel, feetech, intelrealsense]"
-
+# 추가 기능
+pip install -e ".[all]"           # 모든 기능 설치 
+pip install -e ".[aloha,pusht]"   # (Aloha 및 Pusht) 
+pip install -e ".[feetech]"       # Feetech motor(so-101 사용시 설치)
+pip install -e ".[dynamixel]"     # Dynamixel motor
 ```
 
 ---
@@ -45,19 +60,57 @@ pip install -e ".[dynamixel, feetech, intelrealsense]"
 
 텔레오퍼레이션(Teleoperation)을 통해 로봇의 상태(State)와 이미지(Image) 데이터를 수집합니다.
 
-**Robot Setting:** [OpenManipulator-X](https://ai.robotis.com/omx/lerobot_imitation_learning_omx), [SO-101](https://huggingface.co/docs/lerobot/so101)
+### Robot Setting
+* [OpenManipulator-X](https://ai.robotis.com/omx/lerobot_imitation_learning_omx)
+* [SO-101](https://huggingface.co/docs/lerobot/so101)
+
 각 링크를 참조하여 로봇 세팅을 완료해주세요.
 
+### Teleoperation Example
 
-**Teleoperation Command Example:**
+**Command**
 ```bash
 lerobot-teleoperate \
     --robot.type=so101_follower \
-    --robot.port=/dev/tty.usbmodem58760431541 \
-    --robot.id=my_awesome_follower_arm \
+    --robot.port=/dev/ttyACM0 \
+    --robot.id=follower \
     --teleop.type=so101_leader \
-    --teleop.port=/dev/tty.usbmodem58760431551 \
-    --teleop.id=my_awesome_leader_arm
+    --teleop.port=/dev/ttyACM1 \
+    --teleop.id=leader \
+    --robot.cameras="{
+        top:   { type: opencv, index_or_path: /dev/video0, width: 640, height: 480, fps: 30 },
+        wrist: { type: opencv, index_or_path: /dev/video2, width: 640, height: 480, fps: 30 }
+        }"
+```
+**API**
+```
+from lerobot.cameras.opencv.configuration_opencv import OpenCVCameraConfig
+from lerobot.teleoperators.so_leader import SO101LeaderConfig, SO101Leader
+from lerobot.robots.so_follower import SO101FollowerConfig, SO101Follower
+
+camera_config = {
+    "top": OpenCVCameraConfig(index_or_path=0, width=640, height=480, fps=25),
+    "wrist": OpenCVCameraConfig(index_or_path=2, width=640, height=480, fps=25)
+}
+
+robot_config = SO101FollowerConfig(
+    port="/dev/ttyACM0",
+    id="follower",
+)
+
+teleop_config = SO101LeaderConfig(
+    port="/dev/ttyACM1",
+    id="leader",
+)
+
+robot = SO101Follower(robot_config)
+teleop_device = SO101Leader(teleop_config)
+robot.connect()
+teleop_device.connect()
+
+while True:
+    action = teleop_device.get_action()
+    robot.send_action(action)
 ```
 
 **Record Command Example:**
