@@ -166,7 +166,27 @@ PY
 ```bash
 source ~/.bashrc
 ```
+</details>
 
+<details>
+<summary>Calibration</summary>
+
+**Command**
+* Leader
+```bash
+lerobot-calibrate \
+    --teleop.type=so101_leader \
+    --teleop.port=/dev/ACM0 \
+    --teleop.id=leader
+```
+
+* Follower
+```bash
+lerobot-calibrate \
+    --robot.type=so101_follower \
+    --robot.port=/dev/ACM1 \
+    --robot.id=follower
+```
 </details>
 
 ### Teleoperation Example
