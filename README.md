@@ -194,12 +194,12 @@ lerobot-calibrate \
 **Command**
 ```bash
 lerobot-teleoperate \
-    --robot.type=so101_follower \
-    --robot.port=/dev/ttyACM0 \
-    --robot.id=follower \
     --teleop.type=so101_leader \
-    --teleop.port=/dev/ttyACM1 \
+    --teleop.port=/dev/ttyACM0 \
     --teleop.id=leader \
+    --robot.type=so101_follower \
+    --robot.port=/dev/ttyACM1 \
+    --robot.id=follower \
     --display_data=true \
     --robot.cameras='{
         top: {type: opencv, index_or_path: 0, width: 640, height: 480, fps: 25},
@@ -213,16 +213,16 @@ lerobot-teleoperate \
 * hf cli login required
 ```bash
 lerobot-record \
+    --teleop.type=so101_leader \
+    --teleop.port=/dev/ttyACM0 \
+    --teleop.id=leader \
     --robot.type=so101_follower \
-    --robot.port=/dev/ttACM0 \
+    --robot.port=/dev/ttACM1 \
     --robot.id=follower \
     --robot.cameras='{
         top: {type: opencv, index_or_path: 0, width: 640, height: 480, fps: 25},
         wrist: {type: opencv, index_or_path: 2, width: 640, height: 480, fps: 25},
     }' \
-    --teleop.type=so101_leader \
-    --teleop.port=/dev/ttyACM1 \
-    --teleop.id=leader \
     --display_data=true \
     --dataset.repo_id=${HF_USER}/record-test \ 
     --dataset.single_task="Grab the black cube" \
