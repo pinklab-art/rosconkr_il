@@ -180,6 +180,7 @@ lerobot-teleoperate \
     --teleop.type=so101_leader \
     --teleop.port=/dev/ttyACM1 \
     --teleop.id=leader \
+    --display_data=true \
     --robot.cameras='{
         top: {type: opencv, index_or_path: 0, width: 640, height: 480, fps: 25},
         wrist: {type: opencv, index_or_path: 2, width: 640, height: 480, fps: 25},
@@ -189,6 +190,7 @@ lerobot-teleoperate \
 ### Record Example
 
 **Command**
+* hf cli login required
 ```bash
 lerobot-record \
     --robot.type=so101_follower \
@@ -202,7 +204,7 @@ lerobot-record \
     --teleop.port=/dev/ttyACM1 \
     --teleop.id=leader \
     --display_data=true \
-    --dataset.repo_id=${HF_USER}/record-test \ # hf cli login required
+    --dataset.repo_id=${HF_USER}/record-test \ 
     --dataset.single_task="Grab the black cube" \
     --dataset.num_episodes=5 \
     --dataset.episode_time_s=30 \
@@ -214,6 +216,7 @@ lerobot-record \
 ```
 
 **데이터 추가 수집 command**
+* resume=true 시, 데이터 추가 수집
 ```bash
 lerobot-record \
     --teleop.type=so101_leader \
@@ -232,7 +235,7 @@ lerobot-record \
     --dataset.episode_time_s=30 \
     --dataset.reset_time_s=5 \
     --display_data=true \
-    --resume=true # true 시, 추가 수집
+    --resume=true
 ```
 
 
@@ -333,15 +336,15 @@ lerobot-train \
   --output_dir=outputs/train/act_your_dataset \
   --job_name=act_your_dataset \
   --policy.device=cuda \
-  --wandb.enable=true \ # optional
+  --wandb.enable=true \
   --policy.repo_id=${HF_USER}/act_policy # hf cli login required
 ```
 
 **Option B: SmolVLA (Vision-Language Action)**
-
+*  hf cli login required
 ```bash
 lerobot-train \
-  --dataset.repo_id=${HF_USER}/mydataset \ # hf cli login required
+  --dataset.repo_id=${HF_USER}/mydataset \
   --policy.repo_id=${HF_USER}/mydataset_smolvla \
   --policy.path=lerobot/smolvla_base \
   --batch_size=8 \
