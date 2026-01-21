@@ -235,6 +235,66 @@ lerobot-record \
     --resume=true # true 시, 추가 수집
 ```
 
+
+**데이터 제거 (optional)**
+
+```bash
+# Delete episodes 0, 2, and 5 (modifies original dataset)
+lerobot-edit-dataset \
+    --repo_id lerobot/pusht \
+    --operation.type delete_episodes \
+    --operation.episode_indices "[0, 2, 5]"
+
+# Delete episodes and save to a new dataset (preserves original dataset)
+lerobot-edit-dataset \
+    --repo_id lerobot/pusht \
+    --new_repo_id lerobot/pusht_after_deletion \
+    --operation.type delete_episodes \
+    --operation.episode_indices "[0, 2, 5]"
+```
+
+**데이터셋 merge (optional)**
+```bash
+lerobot-edit-dataset \
+    --repo_id lerobot/pusht_merged \
+    --operation.type merge \
+    --operation.repo_ids "['lerobot/pusht_train', 'lerobot/pusht_val']"
+```
+
+**Features 제거 (optional)**
+```bash
+# Remove a camera feature
+lerobot-edit-dataset \
+    --repo_id lerobot/pusht \
+    --operation.type remove_feature \
+    --operation.feature_names "['observation.images.top']"
+```
+
+<details>
+<summary>데이터 수집 팁</summary>
+   
+* **기본 팁**
+   * **원격 조작으로 충분히 하려는 TASK에 익숙해진 다음 취득하는걸 추천**
+   * **위치당 10개, 최소 50개의 에피소드 취득을 권장**
+   * **카메라는 고정된 상태 유지, 녹화하는 동안 일관된 집기 동작을 유지**
+   * **물체가 다 보이게 카메라 배치**
+   * **동작 혹은 위치변경 등 변화가 너무 많을 시, 결과에 부정적인 영향을 줌** (적은 데이터셋 대비 변화가 많을 시)
+* **이미지 품질 팁**
+   * 가급적 **두 개의 카메라 뷰를 사용**
+   * **흔들림 없이 안정적인 영상 촬영**
+   * **중립적이고 안정적인 조명을 유지** (지나치게 노란색이나 파란색 톤은 피하기)
+   * **일관된 노출과 선명한 초점을 유지**
+   * **리더 팔은 프레임에 나타나지 않아야 함**
+   * **움직이는 물체는 팔과 조작되는 물건만 있어야 함** (사람 팔다리/몸은 최대한 배제)
+   * **정적이고 방해가 되지 않는 배경을 사용**하거나 통제된 변형을 적용
+   * **고해상도로 녹화** (최소 480x640 / 720p)
+* **작업 내용 팁**
+   * **task필드를 사용하여 로봇의 목적을 명확하게 설명** (ex. Pick the yellow lego block and put it in the box)
+   * **작업 설명은 간결하게 유지** (25~50자)
+   * **task1, demo2, 등과 같이 모호하거나 일반적인 이름은 피하기**
+   
+</details>
+
 ## 2. Demonstration Review & Train (데모 리뷰 및 학습)
 
 수집된 데이터의 품질을 검증하고 정책(Policy) 모델을 학습합니다.
