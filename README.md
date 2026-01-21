@@ -1,7 +1,7 @@
-# ROSCon KR IL Workshop: LeRobot with Real Robots
+# ROSCon KR IL Workshop: Imitation Learning with Real Robots
 
 2026 ROSCon KR 모방학습 워크샵을 위한 자료입니다. 
-Hugging Face의 LeRobot 프레임워크를 사용하여 데이터 수집, 데이터셋 관리, 모델 학습(ACT, SmolVLA), 그리고 실물 로봇 제어를 위한 추론 과정을 다룹니다.
+Hugging Face의 LeRobot 프레임워크 기반으로 모방학습의 데이터 수집, 데이터셋 관리, 모델 학습(ACT, SmolVLA), 그리고 실물 로봇 제어를 통한 추론 과정을 배웁니다.
 
 ---
 
