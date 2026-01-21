@@ -183,7 +183,7 @@ lerobot-teleoperate \
     --robot.cameras='{
         top: {type: opencv, index_or_path: 0, width: 640, height: 480, fps: 25},
         wrist: {type: opencv, index_or_path: 2, width: 640, height: 480, fps: 25},
-    }' \
+    }'
 ```
 
 ### Record Example
