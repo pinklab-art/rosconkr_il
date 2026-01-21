@@ -176,7 +176,7 @@ source ~/.bashrc
 ```bash
 lerobot-calibrate \
     --teleop.type=so101_leader \
-    --teleop.port=/dev/ACM0 \
+    --teleop.port=/dev/ttyACM0 \
     --teleop.id=leader
 ```
 
@@ -184,7 +184,7 @@ lerobot-calibrate \
 ```bash
 lerobot-calibrate \
     --robot.type=so101_follower \
-    --robot.port=/dev/ACM1 \
+    --robot.port=/dev/ttyACM1 \
     --robot.id=follower
 ```
 </details>
