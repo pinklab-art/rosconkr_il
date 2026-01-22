@@ -390,7 +390,7 @@ lerobot-train \
 ```bash
 lerobot-record \
   --robot.type=so100_follower \
-  --robot.port=/dev/ttyACM0 \
+  --robot.port=/dev/ttyACM1 \
   --robot.id=my_robot \
   --robot.cameras="{ front: {type: opencv, index_or_path: 0, width: 640, height: 480, fps: 30}}" \
   --display_data=true \
