@@ -429,9 +429,9 @@ python -m lerobot.async_inference.robot_client \
     --robot.type=so101_follower \
     --robot.port=/dev/ttyACM1 \
     --robot.id=follower \
-    --robot.cameras='{ \
-        top: {type: opencv, index_or_path: 0, width: 640, height: 480, fps: 25}, \
-        wrist: {type: opencv, index_or_path: 2, width: 640, height: 480, fps: 25}, \
+    --robot.cameras='{
+        top: {type: opencv, index_or_path: 0, width: 640, height: 480, fps: 25},
+        wrist: {type: opencv, index_or_path: 2, width: 640, height: 480, fps: 25},
     }' \
     --task=IMsubin/pick_tomato_place_pot \
     --server_address=127.0.0.1:8080 \
