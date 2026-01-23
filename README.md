@@ -3,8 +3,6 @@
 2026 ROSCon KR 모방학습 워크샵을 위한 자료입니다. 
 Hugging Face의 LeRobot 프레임워크 기반으로 데이터 수집, 데이터셋 관리, 모델 학습(ACT, SmolVLA), 그리고 실물 로봇 제어를 통한 추론 과정을 배웁니다.
 
-* [모방학습 ppt 자료](https://drive.google.com/file/d/1y4xNC8P1divrCfD2k8kFEjoHZT_MxSHg/view?usp=sharing)
-
 ---
 
 # Prerequisites & Installation
