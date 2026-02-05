@@ -450,8 +450,3 @@ python -m lerobot.async_inference.robot_client \
 * [LeRobot Dataset Guide](https://huggingface.co/docs/lerobot/lerobot-dataset-v3)
 * [ACT Policy Info](https://huggingface.co/docs/lerobot/act)
 * [LeRobot Asynchronous Design](https://huggingface.co/docs/lerobot/async)
-
-### 데이터 취득 가이드
-
-* **Safety & Hardware:** (작성 예정: E-Stop 위치, 카메라 고정, 조명 등 하드웨어 체크리스트)
-* **High Quality Data:** (작성 예정: 다양성 확보, 멈춤 없는 동작, 복구 동작 포함 등 노하우 기술)
